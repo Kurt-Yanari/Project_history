@@ -2,7 +2,8 @@ import istorya
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QPushButton, QLabel, QListWidget, QTextEdit, 
-                            QMessageBox, QLineEdit, QHBoxLayout, QScrollArea)
+                            QMessageBox, QLineEdit, QHBoxLayout, QScrollArea,
+                            QTableWidget, QTableWidgetItem, QHeaderView)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
@@ -84,11 +85,66 @@ rf_rulers = [
     ("Владимир Владимирович Путин", "2012-настоящее время", "putin")
 ]
 
+# Данные для поиска по дате (пример)
+historical_events = {
+    "862": "Призвание варягов и начало правления Рюрика",
+    "882": "Объединение Киева и Новгорода под властью Олега",
+    "988": "Крещение Руси князем Владимиром",
+    "1147": "Первое упоминание Москвы в летописи",
+    "1242": "Ледовое побоище - победа Александра Невского",
+    "1380": "Куликовская битва - победа Дмитрия Донского",
+    "1480": "Стояние на Угре - конец монголо-татарского ига",
+    "1547": "Венчание Ивана IV на царство",
+    "1613": "Избрание Михаила Романова на царство",
+    "1703": "Основание Санкт-Петербурга",
+    "1812": "Отечественная война с Наполеоном",
+    "1861": "Отмена крепостного права",
+    "1917": "Февральская и Октябрьская революции",
+    "1945": "Победа в Великой Отечественной войне",
+    "1991": "Распад СССР и создание Российской Федерации"
+}
+
+# Словарь терминов
+historical_terms = {
+    "Варяги": "Скандинавские воины-купцы, приглашенные на Русь в 862 году",
+    "Вече": "Народное собрание в древней Руси для решения важных вопросов",
+    "Дружина": "Княжеское войско в Древней Руси",
+    "Удел": "Часть княжества, выделенная одному из младших членов правящей династии",
+    "Бояре": "Высший слой феодалов в древней Руси",
+    "Поместье": "Земельное владение, даваемое за военную службу",
+    "Опричнина": "Политика террора, проводимая Иваном Грозным",
+    "Самодержавие": "Форма правления с неограниченной властью монарха",
+    "Сенат": "Высший орган государственной власти в Российской империи",
+    "Коллегии": "Центральные органы управления в России XVIII века",
+    "Земство": "Орган местного самоуправления в Российской империи",
+    "Дума": "Законодательное собрание в России"
+}
+
+# Церковные личности
+church_figures = [
+    ("Владимир I Святой", "Князь, креститель Руси", "978-1015"),
+    ("Ольга Святая", "Первая христианская правительница Руси", "945-964"),
+    ("Митрополит Иларион", "Первый русский митрополит, автор 'Слова о Законе и Благодати'", "1051-1054"),
+    ("Сергий Радонежский", "Основатель Троице-Сергиевой лавры, благословил Дмитрия Донского", "1314-1392"),
+    ("Митрополит Алексий", "Фактический правитель Руси при малолетнем Дмитрии Донском", "1354-1378"),
+    ("Патриарх Никон", "Провел церковную реформу, приведшую к расколу", "1652-1666"),
+    ("Протопоп Аввакум", "Лидер старообрядцев, противник реформ Никона", "1620-1682"),
+    ("Иоанн Кронштадтский", "Известный проповедник и духовный писатель", "1829-1908")
+]
+
+# Современники (примеры)
+contemporaries_data = {
+    "Петр I": ["Карл XII (Швеция)", "Август II Сильный (Польша)", "Екатерина I"],
+    "Екатерина II": ["Фридрих II (Пруссия)", "Мария-Терезия (Австрия)", "Вольтер", "Дидро"],
+    "Александр I": ["Наполеон Бонапарт", "М.И. Кутузов", "Михаил Сперанский"],
+    "Николай II": ["В.И. Ленин", "Григорий Распутин", "П.А. Столыпин"]
+}
+
 class HistoryApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Справочник исторических личностей")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 900, 700)
         self.show_main_menu()
     
     def clear_layout(self, layout):
@@ -238,47 +294,177 @@ class HistoryApp(QMainWindow):
         layout.addWidget(close_btn)
         
         info_window.show()
-    
+
     def show_church_figures(self):
-        QMessageBox.information(self, "Информация", "Церковные личности - раздел в разработке...")
-    
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        
+        title = QLabel("Церковные личности в истории России")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        # Создаем таблицу для отображения церковных деятелей
+        table = QTableWidget()
+        table.setColumnCount(3)
+        table.setHorizontalHeaderLabels(["Имя", "Деятельность", "Годы жизни"])
+        
+        # Заполняем таблицу данными
+        table.setRowCount(len(church_figures))
+        for i, (name, activity, years) in enumerate(church_figures):
+            table.setItem(i, 0, QTableWidgetItem(name))
+            table.setItem(i, 1, QTableWidgetItem(activity))
+            table.setItem(i, 2, QTableWidgetItem(years))
+        
+        # Настраиваем внешний вид таблицы
+        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        table.setSortingEnabled(True)
+        
+        layout.addWidget(table)
+        
+        back_btn = QPushButton("Назад")
+        back_btn.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_btn)
+
     def show_date_search(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
         
-        title = QLabel("Поиск по дате")
-        title.setFont(QFont("Arial", 14, QFont.Bold))
+        title = QLabel("Поиск исторических событий по дате")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        instruction = QLabel("Введите год:")
+        instruction = QLabel("Введите год (от 800 до 2024):")
+        instruction.setFont(QFont("Arial", 12))
         layout.addWidget(instruction)
         
         self.year_entry = QLineEdit()
+        self.year_entry.setPlaceholderText("Например: 1812, 1945...")
+        self.year_entry.setFont(QFont("Arial", 12))
         layout.addWidget(self.year_entry)
         
-        btn_layout = QHBoxLayout()
-        search_btn = QPushButton("Искать")
+        search_btn = QPushButton("Найти события")
+        search_btn.setFont(QFont("Arial", 12))
         search_btn.clicked.connect(self.search_date)
+        layout.addWidget(search_btn)
+        
+        self.result_label = QLabel("")
+        self.result_label.setFont(QFont("Arial", 11))
+        self.result_label.setWordWrap(True)
+        layout.addWidget(self.result_label)
+        
+        # Показываем примеры дат
+        examples_label = QLabel("Примеры дат для поиска: 862, 988, 1147, 1242, 1380, 1480, 1703, 1812, 1917, 1945")
+        examples_label.setFont(QFont("Arial", 10))
+        examples_label.setStyleSheet("color: gray;")
+        layout.addWidget(examples_label)
+        
         back_btn = QPushButton("Назад")
         back_btn.clicked.connect(self.show_main_menu)
-        
-        btn_layout.addWidget(search_btn)
-        btn_layout.addWidget(back_btn)
-        layout.addLayout(btn_layout)
-    
+        layout.addWidget(back_btn)
+
     def search_date(self):
         year = self.year_entry.text()
-        if year.isdigit():
-            QMessageBox.information(self, "Поиск", f"Поиск событий за {year} год...\nФункция в разработке...")
+        if year.isdigit() and 800 <= int(year) <= 2024:
+            if year in historical_events:
+                event = historical_events[year]
+                self.result_label.setText(f"📅 {year} год:\n{event}")
+                self.result_label.setStyleSheet("color: green; font-weight: bold;")
+            else:
+                self.result_label.setText(f"Для {year} года события не найдены в базе данных.\nПопробуйте другую дату.")
+                self.result_label.setStyleSheet("color: orange;")
         else:
-            QMessageBox.critical(self, "Ошибка", "Введите корректный год")
-    
+            self.result_label.setText("❌ Пожалуйста, введите корректный год от 800 до 2024")
+            self.result_label.setStyleSheet("color: red;")
+
     def show_unknown_terms(self):
-        QMessageBox.information(self, "Информация", "Словарь терминов - раздел в разработке...")
-    
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        
+        title = QLabel("Словарь исторических терминов")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        instruction = QLabel("Выберите термин для просмотра определения:")
+        instruction.setFont(QFont("Arial", 12))
+        layout.addWidget(instruction)
+        
+        # Создаем список терминов
+        self.terms_list = QListWidget()
+        for term in historical_terms.keys():
+            self.terms_list.addItem(term)
+        layout.addWidget(self.terms_list)
+        
+        # Область для отображения определения
+        self.definition_text = QTextEdit()
+        self.definition_text.setReadOnly(True)
+        self.definition_text.setPlaceholderText("Выберите термин из списка чтобы увидеть его определение...")
+        layout.addWidget(self.definition_text)
+        
+        # Подключаем выбор элемента списка
+        self.terms_list.currentItemChanged.connect(self.show_term_definition)
+        
+        back_btn = QPushButton("Назад")
+        back_btn.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_btn)
+
+    def show_term_definition(self, current, previous):
+        if current:
+            term = current.text()
+            definition = historical_terms.get(term, "Определение не найдено")
+            self.definition_text.setText(f"📚 {term}:\n\n{definition}")
+
     def show_contemporaries(self):
-        QMessageBox.information(self, "Информация", "Поиск современников - раздел в разработке...")
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        
+        title = QLabel("Исторические современники")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        instruction = QLabel("Выберите историческую личность чтобы увидеть её современников:")
+        instruction.setFont(QFont("Arial", 12))
+        layout.addWidget(instruction)
+        
+        # Создаем список личностей
+        self.person_list = QListWidget()
+        for person in contemporaries_data.keys():
+            self.person_list.addItem(person)
+        layout.addWidget(self.person_list)
+        
+        # Область для отображения современников
+        self.contemporaries_text = QTextEdit()
+        self.contemporaries_text.setReadOnly(True)
+        self.contemporaries_text.setPlaceholderText("Выберите историческую личность из списка...")
+        layout.addWidget(self.contemporaries_text)
+        
+        # Подключаем выбор элемента списка
+        self.person_list.currentItemChanged.connect(self.show_contemporaries_list)
+        
+        back_btn = QPushButton("Назад")
+        back_btn.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_btn)
+
+    def show_contemporaries_list(self, current, previous):
+        if current:
+            person = current.text()
+            contemporaries = contemporaries_data.get(person, [])
+            if contemporaries:
+                text = f"👥 {person} был современником:\n\n"
+                for contemporary in contemporaries:
+                    text += f"• {contemporary}\n"
+                self.contemporaries_text.setText(text)
+            else:
+                self.contemporaries_text.setText(f"Информация о современниках {person} не найдена.")
 
 def main():
     app = QApplication(sys.argv)
